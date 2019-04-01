@@ -1,53 +1,49 @@
 import React, { Component } from 'react';
+import {connect} from 'react-redux'
+import * as actions from './../actions/index'
 
 class NoteForm extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        id : "",
-        title : "",
-        desc : "",
+        id : '',
+        title : '',
+        desc : '',
         status : false
       }
     }
     // componentWullMount chỉ chạy khi form này chưa đc hiển thị , còn khi hiển thị rồi thì sẽ k gọi nữa
     componentWillMount() {
-      if(this.props.noteEdit != null){
+      if(this.props.noteEdit && this.props.noteEdit != null){
         this.setState({
-          id : this.props.noteEdit.id,
-          title : this.props.noteEdit.title,  
-          desc : this.props.noteEdit.desc,
-          status : this.props.noteEdit.status
+          id : this.props.updateNote.id,
+          title : this.props.updateNote.title,  
+          desc : this.props.updateNote.desc,
+          status : this.props.updateNote.status
         })
+      }else{
+        this.onClear();
       }
     }
     
     componentWillReceiveProps(nextProps) {
-      if(nextProps && nextProps.noteEdit){
+      if(nextProps && nextProps.updateNote){
         this.setState({
-          id : nextProps.noteEdit.id,
-          title : nextProps.noteEdit.title,  
-          desc : nextProps.noteEdit.desc,
-          status : nextProps.noteEdit.status
+          id : nextProps.updateNote.id,
+          title : nextProps.updateNote.title,  
+          desc : nextProps.updateNote.desc,
+          status : nextProps.updateNote.status
         })
-      }else if(!nextProps.noteEdit){
-        this.setState({
-          id : "",
-          title : "",
-          desc : "",
-          status : false
-        })
+      }else{
+        this.onClear();
       }
-    }
-    
-    onCloseForm = () => {
-      this.props.onCloseForm();
     }
     
     onChange = (event) => {
       var target = event.target;
       var name = target.name;
       var value = target.value;
+      // sử lí kiểu status string thành pool
       if(name === 'status'){
         value = target.value === 'true' ? true : false
       }
@@ -56,12 +52,13 @@ class NoteForm extends Component {
       })
     }
 
-    onSubmit= (event) => {
+    onSave= (event) => {
       event.preventDefault();
-      this.props.onSubmit(this.state);
+      this.props.onSaveNote(this.state)
       this.onClear();
-      this.onCloseForm();
+      this.props.onCloseForm();
     }
+
     onClear = () => {
       this.setState({
         title : "",
@@ -71,15 +68,23 @@ class NoteForm extends Component {
     }
 
     render() {
+      console.log(typeof this.state.status);
       var {id} = this.state;
+      var {isDisplayForm} = this.props;
         return (
+          isDisplayForm === false ? '' :
           <div className="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <div className="card">
-              <div className="card-header bg-warning">
-                {id !== "" ? "Sửa Ghi Chú" : "Thêm Ghi Chú" } <span><i className="far fa-times-circle float-right mt-1 cursor-pointer" onClick={ this.onCloseForm}></i></span>
+              <div className={id !== "" ? "card-header bg-warning" : "card-header bg-info"}>
+                {id !== "" ? "Sửa Ghi Chú" : "Thêm Ghi Chú" }
+                <span>
+                  <i className="far fa-times-circle float-right mt-1 cursor-pointer" 
+                  onClick={() => this.props.onCloseForm()}>
+                  </i>
+                  </span>
               </div>
               <div className="card-body">
-                <form onSubmit={this.onSubmit}>
+                <form onSubmit={this.onSave}>
                   <div className="form-group">
                     <label>Tiêu đề :</label>
                     <input type="text" 
@@ -113,11 +118,11 @@ class NoteForm extends Component {
                     {
                       id !== "" ?
                       <button type="submit" className="btn btn-warning mr-2"><i className="fas fa-edit mr-2"></i>
-                      Sửa
+                        Sửa
                       </button>
                       :
                       <button type="submit" className="btn btn-success mr-2"><i className="fas fa-plus-square mr-2"></i>
-                      Thêm
+                        Thêm
                       </button>
                     }
                     <button
@@ -134,5 +139,21 @@ class NoteForm extends Component {
         );
     }
 }
+const mapStateToProps = (state, ownProps) => {
+  return {
+    isDisplayForm: state.displayForm,
+    updateNote : state.updateNote
+  }
+}
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    onSaveNote: (note) => {
+      dispatch(actions.onSaveNote(note));
+    },
+    onCloseForm: () => {
+      dispatch(actions.CloseForm());
+    }
+  }
+}
 
-export default NoteForm;
+export default connect(mapStateToProps, mapDispatchToProps)(NoteForm)

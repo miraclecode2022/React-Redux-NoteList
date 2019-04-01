@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
-
+import {connect} from 'react-redux'
+import * as actions from './../actions/index'
 class NoteItem extends Component {
   
     onUpdateStatus = () => {
-      // console.log(this.props.notes.id);
       this.props.onUpdateStatus(this.props.notes.id)
-    }
+    } 
     onDelete = () => {
-      this.props.onDelete(this.props.notes.id)
+      this.props.onDelete(this.props.notes.id);
+      this.props.onCloseForm();
     }
     onUpdate = () => {
-      this.props.onUpdate(this.props.notes.id)
+      this.props.onUpdateNote(this.props.notes)
+      this.props.onOpenForm();
     }
     render() {
       var {notes,index} = this.props
@@ -47,4 +49,23 @@ class NoteItem extends Component {
     }
 }
 
-export default NoteItem;
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    onUpdateStatus: (id) => {
+      dispatch(actions.UpdateStatus(id))
+    },
+    onDelete : (id) => {
+      dispatch(actions.DeleteNote(id))
+    },
+    onCloseForm: () => {
+      dispatch(actions.CloseForm());
+    },
+    onOpenForm: () => {
+      dispatch(actions.OpenForm());
+    },
+    onUpdateNote: (notes) => {
+      dispatch(actions.UpdateNote(notes));
+    }
+  }
+}
+export default connect(null,mapDispatchToProps)(NoteItem)

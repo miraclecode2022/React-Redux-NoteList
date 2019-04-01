@@ -6,8 +6,8 @@ class NoteControl extends Component {
     render() {
         return (
             <div className="row mt-3">
-                <NoteSearchControl onSearch={this.props.onSearch}/>
-                <NoteSortControl onSort={this.props.onSort}/>
+                <NoteSearchControl/>
+                <NoteSortControl/>
             </div>   
         );
     }
